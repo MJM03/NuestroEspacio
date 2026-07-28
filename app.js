@@ -83,7 +83,7 @@
         if(n==='leche evaporada'&&['lata','latas'].includes(item.unit)){item.qty=Number(item.qty||0)*400;item.min=Number(item.min||0)*400;item.dailyUse=Number(item.dailyUse||0)*400;item.unit='ml';item.purchaseUnit='lata';item.conversion=400;}
         if(n==='pan de molde'&&['paquete','paquetes'].includes(item.unit)){item.qty=Number(item.qty||0)*20;item.min=Number(item.min||0)*20;item.dailyUse=Number(item.dailyUse||0)*20;item.unit='rebanadas';item.purchaseUnit='paquete';item.conversion=20;}
       });
-      s.version=Math.max(2.1,Number(s.version||1));
+      s.version=Math.max(2.2,Number(s.version||1));
       return s;
     } catch { return structuredClone(seed); }
   }
@@ -173,8 +173,82 @@
   const PRODUCT_ALIASES={
     'arroz':'arroz extra','tomate':'tomate italiano','carne de res':'bistec','pollo':'pollo entero',
     'cebolla':'cebolla roja','papa':'papa blanca','leche':'leche evaporada','pan':'pan de molde',
-    'aceite':'aceite vegetal','frejoles':'frejol canario','frijoles':'frejol canario'
+    'aceite':'aceite vegetal','frejoles':'frejol canario','frijoles':'frejol canario',
+    'aceituna':'aceitunas','atun en conserva':'atun','aji panca':'aji panca molido','pescado entero':'pescado',
+    'carne de cerdo':'cerdo','carne de cordero':'cordero','carne de cabrito':'cabrito','platano verde':'platano bellaco',
+    'platano maduro':'platano bellaco','gallina':'pollo entero','ensalada':'lechuga','cerveza':'cerveza botella'
   };
+  // Perfiles de conversión culinaria. Todas las recetas usan este mismo motor.
+  // purchaseUnit: presentación habitual de compra; packageSize/packageUnit: contenido de esa presentación.
+  // unitsPerKg / gramsPerUnit permiten convertir piezas a peso y viceversa de forma aproximada.
+  const INGREDIENT_PROFILES={
+    'aji amarillo':{purchaseUnit:'kg',pantryUnit:'unidades',unitsPerKg:10,price:8},
+    'aji limo':{purchaseUnit:'kg',pantryUnit:'unidades',unitsPerKg:20,price:14},
+    'aji dulce':{purchaseUnit:'kg',pantryUnit:'unidades',unitsPerKg:14,price:10},
+    'aji charapita':{purchaseUnit:'bolsa',pantryUnit:'unidades',packageSize:50,packageUnit:'unidades',price:5},
+    'rocoto':{purchaseUnit:'kg',pantryUnit:'unidades',unitsPerKg:5,price:8},
+    'aji panca':{purchaseUnit:'bolsa',pantryUnit:'g',packageSize:100,packageUnit:'g',price:4},
+    'aceituna':{purchaseUnit:'frasco',pantryUnit:'g',packageSize:250,packageUnit:'g',price:7},
+    'aceitunas':{purchaseUnit:'frasco',pantryUnit:'g',packageSize:250,packageUnit:'g',price:7},
+    'atun en conserva':{purchaseUnit:'lata',pantryUnit:'latas',packageSize:1,packageUnit:'latas',price:7.5},
+    'mayonesa':{purchaseUnit:'frasco',pantryUnit:'g',packageSize:500,packageUnit:'g',price:8},
+    'sillao':{purchaseUnit:'botella',pantryUnit:'ml',packageSize:500,packageUnit:'ml',price:6},
+    'vinagre':{purchaseUnit:'botella',pantryUnit:'ml',packageSize:500,packageUnit:'ml',price:4.5},
+    'vinagre blanco':{purchaseUnit:'botella',pantryUnit:'ml',packageSize:500,packageUnit:'ml',price:4.5},
+    'cerveza':{purchaseUnit:'botella',pantryUnit:'ml',packageSize:330,packageUnit:'ml',price:4.5},
+    'chicha de jora':{purchaseUnit:'botella',pantryUnit:'ml',packageSize:1000,packageUnit:'ml',price:7},
+    'leche evaporada':{purchaseUnit:'lata',pantryUnit:'ml',packageSize:400,packageUnit:'ml',price:4.2},
+    'pan de molde':{purchaseUnit:'paquete',pantryUnit:'rebanadas',packageSize:20,packageUnit:'unidad',price:8.5},
+    'pan':{purchaseUnit:'paquete',pantryUnit:'unidades',packageSize:8,packageUnit:'unidades',price:4},
+    'fideos':{purchaseUnit:'paquete',pantryUnit:'g',packageSize:500,packageUnit:'g',price:4.5},
+    'mani':{purchaseUnit:'bolsa',pantryUnit:'g',packageSize:250,packageUnit:'g',price:6},
+    'jamon':{purchaseUnit:'paquete',pantryUnit:'g',packageSize:200,packageUnit:'g',price:9},
+    'chorizo':{purchaseUnit:'paquete',pantryUnit:'g',packageSize:500,packageUnit:'g',price:14},
+    'tortilla':{purchaseUnit:'paquete',pantryUnit:'unidades',packageSize:10,packageUnit:'unidades',price:8},
+    'espinaca':{purchaseUnit:'atado',pantryUnit:'g',packageSize:300,packageUnit:'g',price:3},
+    'albahaca':{purchaseUnit:'atado',pantryUnit:'atados',packageSize:1,packageUnit:'atados',price:2},
+    'culantro':{purchaseUnit:'atado',pantryUnit:'atados',packageSize:1,packageUnit:'atados',price:2},
+    'hierbabuena':{purchaseUnit:'atado',pantryUnit:'atados',packageSize:1,packageUnit:'atados',price:2},
+    'huacatay':{purchaseUnit:'atado',pantryUnit:'atados',packageSize:1,packageUnit:'atados',price:2.5},
+    'cebolla china':{purchaseUnit:'atado',pantryUnit:'atados',packageSize:1,packageUnit:'atados',price:2},
+    'palillo':{purchaseUnit:'sobre',pantryUnit:'g',packageSize:50,packageUnit:'g',price:2},
+    'bijao':{purchaseUnit:'paquete',pantryUnit:'unidades',packageSize:10,packageUnit:'unidades',price:5},
+    'conchas negras':{purchaseUnit:'docena',pantryUnit:'unidades',packageSize:12,packageUnit:'unidades',price:18},
+    'camarones':{purchaseUnit:'kg',pantryUnit:'kg',price:38},
+    'mariscos':{purchaseUnit:'kg',pantryUnit:'kg',price:28},
+    'pescado entero':{purchaseUnit:'unidad',pantryUnit:'unidades',price:12},
+    'trucha':{purchaseUnit:'unidad',pantryUnit:'unidades',price:12},
+    'pollo entero':{purchaseUnit:'unidad',pantryUnit:'unidades',price:18},
+    'cuy':{purchaseUnit:'unidad',pantryUnit:'unidades',price:28},
+    'gallina':{purchaseUnit:'unidad',pantryUnit:'unidades',price:35},
+    'cabeza de cordero':{purchaseUnit:'unidad',pantryUnit:'unidades',price:25},
+    'pato':{purchaseUnit:'kg',pantryUnit:'kg',price:24},
+    'carne de cabrito':{purchaseUnit:'kg',pantryUnit:'kg',price:28},
+    'carne de cerdo':{purchaseUnit:'kg',pantryUnit:'kg',price:22},
+    'carne de cordero':{purchaseUnit:'kg',pantryUnit:'kg',price:28},
+    'carne seca':{purchaseUnit:'kg',pantryUnit:'kg',price:35},
+    'cecina':{purchaseUnit:'kg',pantryUnit:'kg',price:36},
+    'chicharron':{purchaseUnit:'kg',pantryUnit:'kg',price:32},
+    'paiche':{purchaseUnit:'kg',pantryUnit:'kg',price:30},
+    'papa seca':{purchaseUnit:'kg',pantryUnit:'kg',price:8},
+    'zapallo loche':{purchaseUnit:'kg',pantryUnit:'kg',price:10},
+    'chonta':{purchaseUnit:'kg',pantryUnit:'kg',price:16},
+    'platano verde':{purchaseUnit:'unidad',pantryUnit:'unidades',price:1.5},
+    'platano maduro':{purchaseUnit:'unidad',pantryUnit:'unidades',price:1.5},
+    'cocona':{purchaseUnit:'unidad',pantryUnit:'unidades',price:2},
+    'ensalada':{purchaseUnit:'kg',pantryUnit:'kg',price:8}
+  };
+  const UNIT_CANON={
+    'unidad':'unidad','unidades':'unidad','und':'unidad','pieza':'unidad','piezas':'unidad',
+    'kg':'kg','kilogramo':'kg','kilogramos':'kg','g':'g','gr':'g','gramo':'g','gramos':'g',
+    'l':'L','litro':'L','litros':'L','L':'L','ml':'ml','mililitro':'ml','mililitros':'ml',
+    'docena':'docena','docenas':'docena','lata':'lata','latas':'lata','paquete':'paquete','paquetes':'paquete',
+    'bolsa':'bolsa','bolsas':'bolsa','botella':'botella','botellas':'botella','frasco':'frasco','frascos':'frasco',
+    'atado':'atado','atados':'atado','rebanada':'rebanada','rebanadas':'rebanada','porcion':'porcion','porciones':'porcion',
+    'sobre':'sobre','sobres':'sobre','barra':'barra','barras':'barra','caja':'caja','cajas':'caja','bandeja':'bandeja','bandejas':'bandeja'
+  };
+  function unitKey(u){const raw=String(u||'').trim();return UNIT_CANON[raw]||UNIT_CANON[normalizeText(raw)]||normalizeText(raw);}
+  function profileFor(name){return INGREDIENT_PROFILES[normalizeText(name)]||null;}
   function productFor(name){
     const normalized=normalizeText(name);
     const target=PRODUCT_ALIASES[normalized]||normalized;
@@ -182,26 +256,40 @@
       || state.products.find(x=>normalizeText(x.name).startsWith(`${target} `))
       || state.products.find(x=>normalizeText(x.name).includes(target));
   }
+  function ingredientEdges(name){
+    const p=productFor(name), pr=profileFor(name), edges=[];
+    const add=(a,b,f)=>{a=unitKey(a);b=unitKey(b);f=Number(f);if(a&&b&&isFinite(f)&&f>0){edges.push([a,b,f]);edges.push([b,a,1/f]);}};
+    add('kg','g',1000); add('L','ml',1000); add('docena','unidad',12);
+    if(p && p.unit && p.pantryUnit && Number(p.conversion||0)>0) add(p.unit,p.pantryUnit,p.conversion);
+    if(p && p.packageSize && p.packageUnit) add(p.unit,p.packageUnit,p.packageSize);
+    if(pr && pr.purchaseUnit && pr.pantryUnit && Number(pr.conversion||0)>0) add(pr.purchaseUnit,pr.pantryUnit,pr.conversion);
+    if(pr && pr.packageSize && pr.packageUnit) add(pr.purchaseUnit,pr.packageUnit,pr.packageSize);
+    if(pr && pr.unitsPerKg) add('kg','unidad',pr.unitsPerKg);
+    if(pr && pr.gramsPerUnit) add('unidad','g',pr.gramsPerUnit);
+    if(pr && pr.mlPerUnit) add('unidad','ml',pr.mlPerUnit);
+    return edges;
+  }
+  function ingredientConvert(name,value,from,to){
+    value=Number(value); const source=unitKey(from), target=unitKey(to); if(source===target)return value;
+    const adj={}; ingredientEdges(name).forEach(([a,b,f])=>(adj[a]??=[]).push([b,f]));
+    const queue=[[source,1]], seen=new Set([source]);
+    while(queue.length){const [u,m]=queue.shift();for(const [v,f] of (adj[u]||[])){const next=m*f;if(v===target)return value*next;if(!seen.has(v)){seen.add(v);queue.push([v,next]);}}}
+    return null;
+  }
   function ingredientPurchasePlan(name,qty,unit,roundForPurchase=true){
-    const p=productFor(name);
-    if(!p)return {product:null,qty:Number(qty),unit,note:'Sin equivalencia del catálogo'};
-    let converted=convertMeasure(qty,unit,p.unit);
+    const p=productFor(name), pr=profileFor(name);
+    const purchaseUnit=pr?.purchaseUnit||p?.unit||unit;
+    const converted=ingredientConvert(name,qty,unit,purchaseUnit);
+    const resultQty=converted===null?Number(qty):Number(converted);
+    const isDiscrete=DISCRETE_PURCHASE_UNITS.has(purchaseUnit)||DISCRETE_PURCHASE_UNITS.has(`${purchaseUnit}s`);
+    const finalQty=roundForPurchase&&isDiscrete?Math.ceil(resultQty-1e-9):resultQty;
+    const product=p||{id:`virtual-${normalizeText(name).replace(/\s+/g,'-')}`,name,category:'Otros',unit:purchaseUnit,market:Number(pr?.price||0),supermarket:Number(pr?.price||0)*1.2,wholesale:Number(pr?.price||0)*.85,pantryUnit:pr?.pantryUnit||purchaseUnit,conversion:Number(pr?.conversion||1),packageSize:pr?.packageSize,packageUnit:pr?.packageUnit};
     let note='';
-    if(converted===null && p.packageSize && p.packageUnit){
-      const content=convertMeasure(qty,unit,p.packageUnit);
-      if(content!==null){converted=content/Number(p.packageSize);note=`1 ${p.unit} contiene aprox. ${p.packageSize} ${p.packageUnit}`;}
-    }
-    const pantryUnitCompatible = unit===p.pantryUnit
-      || (unit==='unidades' && ['rebanadas','porciones'].includes(p.pantryUnit))
-      || (p.pantryUnit==='unidades' && ['rebanadas','porciones'].includes(unit));
-    if(converted===null && pantryUnitCompatible && Number(p.conversion||0)>0){
-      converted=Number(qty)/Number(p.conversion);
-      note=`1 ${p.unit} ≈ ${p.conversion} ${p.pantryUnit}`;
-    }
-    if(converted===null && p.unit===p.pantryUnit){converted=Number(qty);}
-    if(converted===null)return {product:p,qty:Number(qty),unit,note:'Revisa la equivalencia manualmente'};
-    if(roundForPurchase && DISCRETE_PURCHASE_UNITS.has(p.unit)) converted=Math.ceil(converted-1e-9);
-    return {product:p,qty:Number(converted),unit:p.unit,note};
+    if(converted===null) note=`Sin equivalencia automática: revisa ${fmtQty(qty)} ${unit}`;
+    else if(unitKey(unit)!==unitKey(purchaseUnit)) note=`${fmtQty(qty)} ${unit} → ${fmtQty(finalQty)} ${purchaseUnit}`;
+    if(pr?.packageSize&&pr?.packageUnit) note+=`${note?' · ':''}1 ${purchaseUnit} ≈ ${pr.packageSize} ${pr.packageUnit}`;
+    if(pr?.unitsPerKg) note+=`${note?' · ':''}1 kg ≈ ${pr.unitsPerKg} unidades`;
+    return {product,qty:finalQty,unit:purchaseUnit,note,converted:converted!==null};
   }
   function recipeCost(recipe, servings=recipe.servings){
     const factor=servings/recipe.servings;
@@ -213,13 +301,8 @@
   function pantryEquivalent(name, qty, unit){
     const item=state.pantry.find(x=>normalizeText(x.productName)===normalizeText(name));
     if(!item)return 0;
-    const product=productFor(name);
-    if(unit===item.unit)return Number(item.qty||0);
-    const direct=convertMeasure(Number(item.qty||0),item.unit,unit);
-    if(direct!==null)return direct;
-    if(product && item.unit===product.pantryUnit && unit===product.unit) return Number(item.qty||0)/Number(product.conversion||1);
-    if(product && item.unit===product.unit && unit===product.pantryUnit) return Number(item.qty||0)*Number(product.conversion||1);
-    return 0;
+    const converted=ingredientConvert(name,Number(item.qty||0),item.unit,unit);
+    return converted===null?0:converted;
   }
   function renderRecipes(){
     const regions=['Todas',...new Set(window.NE_RECIPES.map(r=>r.region))];
@@ -304,27 +387,40 @@
       const paid=prompt('Total real pagado',String((x.qty*x.price).toFixed(2))); if(paid===null)return;
       x.actualTotal=Number(paid)||x.qty*x.price; x.done=true;
       state.expenses.push({id:uid(),name:`Mercado: ${x.productName}`,amount:x.actualTotal,category:'Mercado',period:new Date().getDate()<=15?'Q1':'Q2',date:todayISO(),note:'Generado desde Mercado',sourceCartId:x.id});
-      const p=productFor(x.productName);
-      let pantryUnit=p?.pantryUnit||x.unit, pantryQty=Number(x.qty);
-      if(p){
-        const inPurchaseUnit=convertMeasure(x.qty,x.unit,p.unit);
-        const normalized=inPurchaseUnit===null?Number(x.qty):inPurchaseUnit;
-        pantryQty=p.pantryUnit===p.unit?normalized:normalized*Number(p.conversion||1);
-      }
+      const p=productFor(x.productName), pr=profileFor(x.productName);
+      const purchaseUnit=pr?.purchaseUnit||p?.unit||x.unit;
+      let pantryUnit=pr?.pantryUnit||p?.pantryUnit||x.unit;
+      let pantryQty=ingredientConvert(x.productName,Number(x.qty),x.unit,pantryUnit);
+      if(pantryQty===null){pantryQty=Number(x.qty);pantryUnit=x.unit;}
+      const purchaseToPantry=ingredientConvert(x.productName,1,purchaseUnit,pantryUnit);
       const existing=state.pantry.find(item=>normalizeText(item.productName)===normalizeText(x.productName));
       if(existing){
-        let add=pantryQty;
-        if(existing.unit!==pantryUnit){const c=convertMeasure(pantryQty,pantryUnit,existing.unit);if(c!==null)add=c;else {existing.unit=pantryUnit;}}
-        existing.qty=Number(existing.qty||0)+add;
-      } else state.pantry.push({id:uid(),productName:x.productName,category:x.category,qty:pantryQty,unit:pantryUnit,min:Math.max(1,pantryQty*.25),dailyUse:0,expiry:'',conversion:p?.conversion||1,purchaseUnit:p?.unit||x.unit});
+        let add=ingredientConvert(x.productName,pantryQty,pantryUnit,existing.unit);
+        if(add===null){existing.unit=pantryUnit;add=pantryQty;}
+        existing.qty=Number(existing.qty||0)+Number(add);
+      } else state.pantry.push({id:uid(),productName:x.productName,category:x.category,qty:Number(pantryQty),unit:pantryUnit,min:Math.max(1,Number(pantryQty)*.25),dailyUse:0,expiry:'',conversion:Number(purchaseToPantry||p?.conversion||pr?.conversion||1),purchaseUnit});
     } else {
       x.done=false; state.expenses=state.expenses.filter(e=>e.sourceCartId!==x.id);
     }
     save();renderAll();
   }
   function deleteCart(id){ state.cart=state.cart.filter(i=>i.id!==id); state.expenses=state.expenses.filter(e=>e.sourceCartId!==id); save();renderAll(); }
-  function reorder(id){ const x=state.pantry.find(i=>i.id===id); const needed=Math.max(1,x.min*2-x.qty); const qty=x.purchaseUnit!==x.unit?needed/(x.conversion||1):needed; const p=productFor(x.productName); state.cart.push({id:uid(),productName:x.productName,category:x.category,qty:Number(qty.toFixed(2)),unit:x.purchaseUnit,price:p?.market||0,store:'market',done:false,date:todayISO()}); save();renderAll();toast('Agregado al mercado'); }
+  function reorder(id){ const x=state.pantry.find(i=>i.id===id); const needed=Math.max(1,Number(x.min)*2-Number(x.qty)); const p=productFor(x.productName),pr=profileFor(x.productName); const purchaseUnit=pr?.purchaseUnit||x.purchaseUnit||p?.unit||x.unit; let qty=ingredientConvert(x.productName,needed,x.unit,purchaseUnit); if(qty===null)qty=needed; if(DISCRETE_PURCHASE_UNITS.has(purchaseUnit)||DISCRETE_PURCHASE_UNITS.has(`${purchaseUnit}s`))qty=Math.ceil(qty-1e-9); state.cart.push({id:uid(),productName:x.productName,category:x.category,qty:Number(qty.toFixed(3)),unit:purchaseUnit,price:Number(p?.market||pr?.price||0),store:'market',done:false,date:todayISO(),conversionNote:`Reposición: ${fmtQty(needed)} ${x.unit} → ${fmtQty(qty)} ${purchaseUnit}`}); save();renderAll();toast('Agregado al mercado'); }
   function shareCart(){ const groups={}; state.cart.filter(x=>!x.done).forEach(x=>(groups[x.category]??=[]).push(x)); const text=['🛒 LISTA DE COMPRAS · NUESTROESPACIO','',...Object.entries(groups).flatMap(([c,a])=>[`${c.toUpperCase()}:`,...a.map(x=>`☐ ${x.productName} — ${x.qty} ${x.unit}`),'']),`Estimado: ${money(totals().pending)}`].join('\n'); if(navigator.share)navigator.share({title:'Lista de compras',text}).catch(()=>{}); else navigator.clipboard.writeText(text).then(()=>toast('Lista copiada')); }
+
+  function repairRecipeCartConversions(){
+    let changed=false;
+    (state.cart||[]).forEach(item=>{
+      if(item.done||!item.recipeSourceUnit||!Number.isFinite(Number(item.recipeSourceQty)))return;
+      const plan=ingredientPurchasePlan(item.productName,Number(item.recipeSourceQty),item.recipeSourceUnit,true);
+      const nextQty=Number(plan.qty.toFixed(3));
+      if(Math.abs(Number(item.qty)-nextQty)>.0001||unitKey(item.unit)!==unitKey(plan.unit)||item.price!==Number(plan.product?.market||0)){
+        item.qty=nextQty;item.unit=plan.unit;item.productId=plan.product?.id||item.productId||null;
+        item.category=plan.product?.category||item.category||'Otros';item.price=Number(plan.product?.market||0);item.conversionNote=plan.note;changed=true;
+      }
+    });
+    if(changed)save();
+  }
 
   function renderAll(){ renderDashboard(); renderFinances(); renderMarket(); renderPantry(); renderRecipes(); renderTasks(); renderSettings(); renderCatalog(); icon(); applyTheme(); }
   function showView(v){ currentView=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v)); document.querySelectorAll('.nav-btn').forEach(b=>{const on=b.dataset.view===v;b.className=`nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl ${on?'text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-900':'text-slate-500 dark:text-zinc-400'}`}); window.scrollTo({top:0,behavior:'smooth'}); icon(); }
@@ -351,5 +447,6 @@
   document.getElementById('backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nuestroespacio-respaldo.json';a.click();URL.revokeObjectURL(a.href)};
   document.getElementById('fab').onclick=()=>{({dashboard:openTask,finanzas:openExpense,mercado:openCart,despensa:openPantry,recetas:()=>showView('recetas'),tareas:openTask,configuracion:()=>showView('configuracion'),catalogo:openProduct}[currentView]||openTask)()};
 
+  repairRecipeCartConversions();
   renderAll();
 })();

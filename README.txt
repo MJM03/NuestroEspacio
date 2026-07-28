@@ -17,7 +17,7 @@ NOVEDADES
 
 Uso: subir todos los archivos a la raíz de GitHub Pages.
 
-VERSIÓN 2.1 — CORRECCIONES
+VERSIÓN 2.2 — CORRECCIONES
 - Conversión inteligente de recetas a presentaciones reales de compra.
 - Ají amarillo: unidades → kg usando equivalencia aproximada de 10 unidades/kg.
 - Leche evaporada: ml → latas de 400 ml.
