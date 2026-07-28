@@ -1,0 +1,16 @@
+:root { color-scheme: light dark; }
+    html { scroll-behavior: smooth; }
+    body { min-height: 100vh; }
+    .glass { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .view { display:none; }
+    .view.active { display:block; animation: fade .22s ease; }
+    @keyframes fade { from {opacity:.25; transform:translateY(4px)} to {opacity:1; transform:none} }
+    .modal { display:none; }
+    .modal.open { display:flex; }
+    .progress { transition: width .35s ease; }
+    .scrollbar-hide::-webkit-scrollbar { display:none; }
+    .scrollbar-hide { scrollbar-width:none; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+    .safe-bottom { padding-bottom: calc(7.2rem + env(safe-area-inset-bottom)); }
+    .nav-safe { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
+    .truncate-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }

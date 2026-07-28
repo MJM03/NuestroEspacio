@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-PE">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
-  <meta name="description" content="NuestroEspacio: finanzas, mercado, despensa y tareas compartidas para parejas." />
-  <title>NuestroEspacio</title>
+  <meta name="description" content="NuestroEspacio Perú: finanzas en soles, mercado, despensa y tareas compartidas para parejas." />
+  <title>NuestroEspacio Perú</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -20,24 +20,7 @@
   </script>
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <style>
-    :root { color-scheme: light dark; }
-    html { scroll-behavior: smooth; }
-    body { min-height: 100vh; }
-    .glass { backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
-    .view { display:none; }
-    .view.active { display:block; animation: fade .22s ease; }
-    @keyframes fade { from {opacity:.25; transform:translateY(4px)} to {opacity:1; transform:none} }
-    .modal { display:none; }
-    .modal.open { display:flex; }
-    .progress { transition: width .35s ease; }
-    .scrollbar-hide::-webkit-scrollbar { display:none; }
-    .scrollbar-hide { scrollbar-width:none; }
-    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
-    .safe-bottom { padding-bottom: calc(7.2rem + env(safe-area-inset-bottom)); }
-    .nav-safe { padding-bottom: max(.75rem, env(safe-area-inset-bottom)); }
-    .truncate-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-slate-100 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
   <div id="app" class="min-h-screen">
@@ -46,7 +29,7 @@
         <div class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-white grid place-items-center text-white dark:text-slate-900 shadow-soft"><i data-lucide="house-heart" class="w-5 h-5"></i></div>
         <div class="min-w-0 flex-1">
           <h1 class="font-semibold tracking-tight">NuestroEspacio</h1>
-          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-zinc-400">Centro compartido del hogar</p>
+          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-zinc-400">Centro compartido del hogar · Perú</p>
         </div>
         <button id="themeBtn" class="w-10 h-10 rounded-xl border border-slate-200 dark:border-zinc-800 grid place-items-center hover:bg-slate-50 dark:hover:bg-zinc-900" aria-label="Cambiar tema"><i data-lucide="moon" class="w-4 h-4"></i></button>
         <button id="backupBtn" class="hidden sm:grid w-10 h-10 rounded-xl border border-slate-200 dark:border-zinc-800 place-items-center hover:bg-slate-50 dark:hover:bg-zinc-900" aria-label="Exportar respaldo"><i data-lucide="download" class="w-4 h-4"></i></button>
@@ -87,199 +70,7 @@
   </div>
 
   <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-[60] hidden max-w-[90vw] rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 shadow-2xl text-sm"></div>
-
-<script>
-(() => {
-  'use strict';
-  const KEY='nuestroEspacio_v1';
-  const money = n => new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(Number(n||0));
-  const todayISO = () => new Date().toISOString().slice(0,10);
-  const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);
-  const esc = s => String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-
-  const seed = {
-    version:1,
-    settings:{theme:'light',marketBudget:300,partnerA:'Marcos',partnerB:'Pareja',antExpenseEstimate:80},
-    incomes:[
-      {id:uid(),person:'Marcos',type:'Sueldo',amount:500,period:'Q1',date:todayISO(),active:true},
-      {id:uid(),person:'Marcos',type:'Sueldo',amount:900,period:'Q2',date:todayISO(),active:true},
-      {id:uid(),person:'Pareja',type:'Bono',amount:150,period:'Q2',date:todayISO(),active:true}
-    ],
-    expenses:[
-      {id:uid(),name:'Alquiler',amount:650,category:'Fijos',period:'Q2',date:todayISO(),note:'Pago de casa'},
-      {id:uid(),name:'Pasajes',amount:90,category:'Diarios',period:'Q1',date:todayISO(),note:'Trabajo'},
-      {id:uid(),name:'Café y snacks',amount:24.5,category:'Hormiga',period:'Q1',date:todayISO(),note:''}
-    ],
-    products:[
-      {id:uid(),name:'Tomate',category:'Verduras',unit:'kg',market:3.8,supermarket:5.2,wholesale:3.1,pantryUnit:'unidades',conversion:6},
-      {id:uid(),name:'Limón',category:'Cítricos',unit:'kg',market:4.5,supermarket:6.2,wholesale:3.7,pantryUnit:'unidades',conversion:18},
-      {id:uid(),name:'Arroz',category:'Abarrotes',unit:'kg',market:4.2,supermarket:5.1,wholesale:3.8,pantryUnit:'kg',conversion:1},
-      {id:uid(),name:'Leche',category:'Lácteos',unit:'L',market:4.6,supermarket:5.2,wholesale:4.1,pantryUnit:'L',conversion:1},
-      {id:uid(),name:'Manzana',category:'Frutas',unit:'kg',market:5.5,supermarket:7.2,wholesale:4.8,pantryUnit:'unidades',conversion:6},
-      {id:uid(),name:'Detergente',category:'Limpieza',unit:'paquetes',market:13.5,supermarket:15.9,wholesale:11.8,pantryUnit:'paquetes',conversion:1},
-      {id:uid(),name:'Sartén mediano',category:'Menaje',unit:'unidades',market:45,supermarket:59,wholesale:39,pantryUnit:'unidades',conversion:1}
-    ],
-    cart:[
-      {id:uid(),productName:'Tomate',productId:null,category:'Verduras',qty:1.5,unit:'kg',price:3.8,store:'market',done:false,date:todayISO()},
-      {id:uid(),productName:'Arroz',productId:null,category:'Abarrotes',qty:5,unit:'kg',price:4.2,store:'market',done:false,date:todayISO()},
-      {id:uid(),productName:'Leche',productId:null,category:'Lácteos',qty:2,unit:'L',price:4.6,store:'supermarket',done:true,actualTotal:9.8,date:todayISO()}
-    ],
-    pantry:[
-      {id:uid(),productName:'Arroz',category:'Abarrotes',qty:2,unit:'kg',min:1,dailyUse:.12,expiry:'',conversion:1,purchaseUnit:'kg'},
-      {id:uid(),productName:'Leche',category:'Lácteos',qty:1,unit:'L',min:2,dailyUse:.25,expiry:new Date(Date.now()+4*864e5).toISOString().slice(0,10),conversion:1,purchaseUnit:'L'},
-      {id:uid(),productName:'Limón',category:'Cítricos',qty:7,unit:'unidades',min:5,dailyUse:1,expiry:'',conversion:18,purchaseUnit:'kg'}
-    ],
-    tasks:[
-      {id:uid(),title:'Pagar internet',type:'Tarea',assigned:'Ambos',due:todayISO(),done:false,priority:'Alta'},
-      {id:uid(),title:'Comprar foco para la sala',type:'Compra general',assigned:'Marcos',due:'',done:false,priority:'Media'},
-      {id:uid(),title:'Limpiar refrigeradora',type:'Tarea',assigned:'Pareja',due:'',done:true,priority:'Baja'}
-    ]
-  };
-
-  let state = load();
-  let currentView='dashboard';
-  let chartExpense=null, chartPeriods=null;
-
-  function load(){
-    try { const s=JSON.parse(localStorage.getItem(KEY)); return s && s.settings ? s : structuredClone(seed); }
-    catch { return structuredClone(seed); }
-  }
-  function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
-  function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.remove('hidden'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.add('hidden'),2400); }
-  function icon(){ lucide.createIcons(); }
-  function modal(title,html){ document.getElementById('modalTitle').textContent=title; document.getElementById('modalBody').innerHTML=html; document.getElementById('modal').classList.add('open'); icon(); }
-  function closeModal(){ document.getElementById('modal').classList.remove('open'); }
-
-  function totals(){
-    const inc=state.incomes.filter(x=>x.active!==false).reduce((s,x)=>s+Number(x.amount),0);
-    const exp=state.expenses.reduce((s,x)=>s+Number(x.amount),0);
-    const pending=state.cart.filter(x=>!x.done).reduce((s,x)=>s+Number(x.qty)*Number(x.price),0);
-    const bought=state.cart.filter(x=>x.done).reduce((s,x)=>s+Number(x.actualTotal ?? x.qty*x.price),0);
-    const fixed=state.expenses.filter(x=>x.category==='Fijos').reduce((s,x)=>s+Number(x.amount),0);
-    const ants=state.expenses.filter(x=>x.category==='Hormiga').reduce((s,x)=>s+Number(x.amount),0);
-    return {inc,exp,pending,bought,fixed,ants,projected:inc-exp-pending-state.settings.antExpenseEstimate};
-  }
-  function periodTotals(period){
-    const inc=state.incomes.filter(x=>x.period===period&&x.active!==false).reduce((s,x)=>s+Number(x.amount),0);
-    const exp=state.expenses.filter(x=>x.period===period).reduce((s,x)=>s+Number(x.amount),0);
-    return {inc,exp,balance:inc-exp};
-  }
-  function card(title,value,sub,accent='slate',iconName='circle-dollar-sign'){
-    const colors={emerald:'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',blue:'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',indigo:'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300',amber:'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',slate:'bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200'};
-    return `<article class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex items-start justify-between gap-3"><div><p class="text-xs text-slate-500 dark:text-zinc-400">${esc(title)}</p><p class="mt-1 text-2xl font-semibold tracking-tight">${esc(value)}</p><p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">${esc(sub)}</p></div><div class="w-10 h-10 rounded-xl grid place-items-center ${colors[accent]}"><i data-lucide="${iconName}" class="w-5 h-5"></i></div></div></article>`;
-  }
-
-  function renderDashboard(){
-    const t=totals(); const low=state.pantry.filter(x=>Number(x.qty)<=Number(x.min)).length; const pendingTasks=state.tasks.filter(x=>!x.done).length;
-    const advice=advisor();
-    document.getElementById('dashboard').innerHTML=`
-      <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Resumen del hogar</p><h2 class="text-3xl font-semibold tracking-tight">Todo bajo control</h2></div><button data-action="quick-summary" class="rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-sm hover:bg-white dark:hover:bg-zinc-900"><i data-lucide="sparkles" class="inline w-4 h-4 mr-2"></i>Ver análisis</button></div>
-      <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">${card('Ingresos del mes',money(t.inc),'Sueldo + bonos','emerald','badge-euro')}${card('Gastos registrados',money(t.exp),'Sin incluir pendientes','amber','receipt-text')}${card('Mercado pendiente',money(t.pending),`${state.cart.filter(x=>!x.done).length} productos`,'blue','shopping-basket')}${card('Saldo proyectado',money(t.projected),'Después de fijos, carrito y hormiga','indigo','chart-no-axes-combined')}</div>
-      <div class="grid lg:grid-cols-3 gap-4 mt-4">
-        <article class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex items-center justify-between"><div><p class="text-sm font-medium">Distribución de gastos</p><p class="text-xs text-slate-500 dark:text-zinc-400">Por categoría</p></div><button data-view-jump="finanzas" class="text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white">Abrir finanzas</button></div><div class="h-64 mt-4"><canvas id="expenseChart"></canvas></div></article>
-        <article class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex items-center justify-between"><p class="text-sm font-medium">Estado rápido</p><i data-lucide="activity" class="w-4 h-4 text-slate-400"></i></div><div class="mt-4 space-y-3">${statusRow('Despensa',`${low} por reponer`,low?'amber':'emerald','package-open')}${statusRow('Tareas',`${pendingTasks} pendientes`,pendingTasks?'indigo':'emerald','check-square-2')}${statusRow('Mercado',`${state.cart.filter(x=>!x.done).length} pendientes`,'blue','shopping-cart')}${statusRow('Comprado',money(t.bought),'emerald','badge-check')}</div></article>
-      </div>
-      <article class="mt-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-gradient-to-br from-slate-900 to-slate-700 text-white p-5 shadow-soft"><div class="flex gap-3"><div class="w-10 h-10 rounded-xl bg-white/10 grid place-items-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></div><div><p class="font-medium">AI Expense Advisor</p><p class="mt-1 text-sm text-slate-200">${esc(advice[0])}</p><div class="mt-3 flex flex-wrap gap-2">${advice.slice(1).map(a=>`<span class="text-xs bg-white/10 rounded-full px-3 py-1">${esc(a)}</span>`).join('')}</div></div></div></article>`;
-    renderExpenseChart();
-  }
-  function statusRow(label,value,color,ico){ const c={amber:'text-amber-600 dark:text-amber-300',emerald:'text-emerald-600 dark:text-emerald-300',blue:'text-blue-600 dark:text-blue-300',indigo:'text-indigo-600 dark:text-indigo-300'}[color]; return `<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/70"><i data-lucide="${ico}" class="w-4 h-4 ${c}"></i><div class="flex-1"><p class="text-xs text-slate-500 dark:text-zinc-400">${label}</p><p class="text-sm font-medium">${value}</p></div></div>`; }
-  function renderExpenseChart(){
-    const by={}; state.expenses.forEach(x=>by[x.category]=(by[x.category]||0)+Number(x.amount));
-    const ctx=document.getElementById('expenseChart'); if(!ctx)return; chartExpense?.destroy(); chartExpense=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(by),datasets:[{data:Object.values(by),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}}}}});
-  }
-
-  function renderFinances(){
-    const t=totals(), q1=periodTotals('Q1'), q2=periodTotals('Q2');
-    document.getElementById('finanzas').innerHTML=`
-      <div class="flex items-end justify-between gap-3 mb-5"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Ingresos y gastos</p><h2 class="text-3xl font-semibold">Finanzas</h2></div><div class="flex gap-2"><button data-action="add-income" class="rounded-xl bg-emerald-600 text-white px-3 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Ingreso</button><button data-action="add-expense" class="rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Gasto</button></div></div>
-      <div class="grid md:grid-cols-2 gap-4"><periodCard('1ra Quincena',q1,'Q1')><periodCard('Fin de mes',q2,'Q2')></div>
-      <div class="grid lg:grid-cols-5 gap-4 mt-4">
-        <article class="lg:col-span-3 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><p class="font-medium">Historial financiero</p><p class="text-xs text-slate-500 dark:text-zinc-400">Busca y filtra movimientos</p></div><div class="flex gap-2"><input id="financeSearch" placeholder="Buscar..." class="w-full sm:w-44 rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-2 text-sm"><select id="financeFilter" class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-2 text-sm"><option>Todos</option><option>Ingresos</option><option>Gastos</option></select></div></div><div id="financeList" class="mt-4 space-y-2"></div></article>
-        <article class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><p class="font-medium">Comparación quincenal</p><div class="h-64 mt-4"><canvas id="periodChart"></canvas></div><div class="mt-3 text-sm text-slate-500 dark:text-zinc-400">Proyección general: <strong class="text-slate-900 dark:text-white">${money(t.projected)}</strong></div></article>
-      </div>`;
-    renderFinanceList(); renderPeriodChart();
-  }
-  function periodCard(title,p,period){ const pct=p.inc?Math.min(100,(p.exp/p.inc)*100):100; return `<article class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 shadow-soft"><div class="flex items-center justify-between"><div><p class="text-sm text-slate-500 dark:text-zinc-400">${title}</p><p class="text-2xl font-semibold mt-1 ${p.balance<0?'text-rose-600':'text-emerald-600'}">${money(p.balance)}</p></div><span class="text-xs rounded-full px-3 py-1 bg-slate-100 dark:bg-zinc-800">${period}</span></div><div class="grid grid-cols-2 gap-3 mt-4 text-sm"><div><p class="text-slate-500">Ingresos</p><p class="font-medium">${money(p.inc)}</p></div><div><p class="text-slate-500">Gastos</p><p class="font-medium">${money(p.exp)}</p></div></div><div class="h-2 rounded-full bg-slate-100 dark:bg-zinc-800 mt-4 overflow-hidden"><div class="progress h-full rounded-full ${pct>90?'bg-rose-500':pct>70?'bg-amber-500':'bg-emerald-500'}" style="width:${pct}%"></div></div></article>`; }
-  function financeRows(){ return [...state.incomes.map(x=>({...x,kind:'Ingreso',name:`${x.type} · ${x.person}`})),...state.expenses.map(x=>({...x,kind:'Gasto'}))].sort((a,b)=>String(b.date).localeCompare(String(a.date))); }
-  function renderFinanceList(){ const q=(document.getElementById('financeSearch')?.value||'').toLowerCase(), f=document.getElementById('financeFilter')?.value||'Todos'; const rows=financeRows().filter(x=>(f==='Todos'||f===x.kind+'s')&&(`${x.name} ${x.category||''} ${x.note||''}`.toLowerCase().includes(q))); const el=document.getElementById('financeList'); if(!el)return; el.innerHTML=rows.length?rows.map(x=>`<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/70"><div class="w-9 h-9 rounded-xl grid place-items-center ${x.kind==='Ingreso'?'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50':'bg-rose-100 text-rose-700 dark:bg-rose-950/50'}"><i data-lucide="${x.kind==='Ingreso'?'arrow-down-left':'arrow-up-right'}" class="w-4 h-4"></i></div><div class="min-w-0 flex-1"><p class="text-sm font-medium truncate">${esc(x.name)}</p><p class="text-xs text-slate-500 dark:text-zinc-400">${esc(x.category||x.period||'')} · ${esc(x.date||'')}</p></div><p class="text-sm font-semibold ${x.kind==='Ingreso'?'text-emerald-600':'text-rose-600'}">${x.kind==='Ingreso'?'+':'-'}${money(x.amount)}</p><button data-edit-finance="${x.kind}:${x.id}" class="p-2 text-slate-400"><i data-lucide="pencil" class="w-4 h-4"></i></button></div>`).join(''):`<p class="text-sm text-slate-500 py-8 text-center">Sin movimientos.</p>`; icon(); }
-  function renderPeriodChart(){ const q1=periodTotals('Q1'),q2=periodTotals('Q2'),ctx=document.getElementById('periodChart'); if(!ctx)return; chartPeriods?.destroy(); chartPeriods=new Chart(ctx,{type:'bar',data:{labels:['1ra Quincena','Fin de mes'],datasets:[{label:'Ingresos',data:[q1.inc,q2.inc]},{label:'Gastos',data:[q1.exp,q2.exp]}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}},plugins:{legend:{position:'bottom'}}}}); }
-
-  function renderMarket(){
-    const pending=state.cart.filter(x=>!x.done), total=pending.reduce((s,x)=>s+x.qty*x.price,0), categories=[...new Set(state.cart.map(x=>x.category))];
-    document.getElementById('mercado').innerHTML=`
-      <div class="flex items-end justify-between gap-3 mb-5"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Lista y proyección</p><h2 class="text-3xl font-semibold">Mercado</h2></div><button data-action="add-cart" class="rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Producto</button></div>
-      <div class="grid sm:grid-cols-3 gap-3">${card('Presupuesto',money(state.settings.marketBudget),'Editable en configuración','blue','landmark')}${card('Pendiente estimado',money(total),`${pending.length} productos`,'amber','calculator')}${card('Saldo proyectado',money(state.settings.marketBudget-total),'Después de comprar lo pendiente',state.settings.marketBudget-total<0?'amber':'emerald','piggy-bank')}</div>
-      <div class="mt-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex flex-col md:flex-row gap-3 md:items-center justify-between"><div class="flex gap-2 overflow-auto scrollbar-hide">${['Todos',...categories].map((c,i)=>`<button class="market-cat shrink-0 px-3 py-2 rounded-xl text-sm ${i===0?'bg-slate-900 text-white dark:bg-white dark:text-slate-900':'bg-slate-100 dark:bg-zinc-800'}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div><div class="flex gap-2"><button data-action="share-cart" class="rounded-xl border border-slate-200 dark:border-zinc-700 px-3 py-2 text-sm"><i data-lucide="share-2" class="inline w-4 h-4 mr-1"></i>Compartir</button><select id="marketStatus" class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-2 text-sm"><option value="pending">Pendientes</option><option value="all">Todos</option><option value="done">Comprados</option></select></div></div><div id="cartList" class="mt-4 space-y-3"></div></div>`;
-    renderCart('Todos');
-  }
-  function renderCart(cat='Todos'){
-    const status=document.getElementById('marketStatus')?.value||'pending'; let items=state.cart.filter(x=>(cat==='Todos'||x.category===cat)&&(status==='all'||(status==='done'?x.done:!x.done)));
-    const groups={}; items.forEach(x=>(groups[x.category]??=[]).push(x)); const el=document.getElementById('cartList'); if(!el)return;
-    el.innerHTML=items.length?Object.entries(groups).map(([c,arr])=>`<section><div class="flex items-center justify-between mb-2"><h3 class="text-sm font-semibold">${esc(c)}</h3><span class="text-xs text-slate-500">${arr.length} ítems · ${money(arr.reduce((s,x)=>s+(x.done?(x.actualTotal??x.qty*x.price):x.qty*x.price),0))}</span></div><div class="space-y-2">${arr.map(x=>`<article class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-zinc-800 ${x.done?'bg-emerald-50/60 dark:bg-emerald-950/20':'bg-slate-50 dark:bg-zinc-800/60'}"><button data-toggle-cart="${x.id}" class="w-6 h-6 rounded-lg border ${x.done?'bg-emerald-600 border-emerald-600 text-white':'border-slate-300 dark:border-zinc-600'} grid place-items-center">${x.done?'<i data-lucide="check" class="w-4 h-4"></i>':''}</button><div class="flex-1 min-w-0"><p class="font-medium ${x.done?'line-through text-slate-500':''}">${esc(x.productName)}</p><p class="text-xs text-slate-500 dark:text-zinc-400">${x.qty} ${esc(x.unit)} · ${money(x.price)} / ${esc(x.unit)}</p></div><p class="font-semibold text-sm">${money(x.done?(x.actualTotal??x.qty*x.price):x.qty*x.price)}</p><button data-edit-cart="${x.id}" class="p-2 text-slate-400"><i data-lucide="pencil" class="w-4 h-4"></i></button><button data-delete-cart="${x.id}" class="p-2 text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></article>`).join('')}</div></section>`).join(''):`<p class="text-sm text-slate-500 py-10 text-center">No hay productos en esta vista.</p>`; icon();
-  }
-
-  function renderPantry(){
-    const low=state.pantry.filter(x=>Number(x.qty)<=Number(x.min)).length;
-    document.getElementById('despensa').innerHTML=`<div class="flex items-end justify-between gap-3 mb-5"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Inventario doméstico</p><h2 class="text-3xl font-semibold">Despensa</h2></div><button data-action="add-pantry" class="rounded-xl bg-blue-600 text-white px-4 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Producto</button></div><div class="grid sm:grid-cols-3 gap-3">${card('Productos',state.pantry.length,'Registrados','blue','package')}${card('Por reponer',low,'Stock bajo o agotado',low?'amber':'emerald','triangle-alert')}${card('Vencen pronto',state.pantry.filter(expiringSoon).length,'Próximos 7 días','amber','calendar-clock')}</div><div class="mt-4 flex gap-2"><input id="pantrySearch" placeholder="Buscar en despensa..." class="flex-1 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm"><select id="pantryFilter" class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-3 text-sm"><option value="all">Todos</option><option value="low">Por reponer</option><option value="exp">Vence pronto</option></select></div><div id="pantryList" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-4"></div>`; renderPantryList();
-  }
-  function expiringSoon(x){ if(!x.expiry)return false; const d=(new Date(x.expiry)-new Date())/864e5; return d>=0&&d<=7; }
-  function renderPantryList(){ const q=(document.getElementById('pantrySearch')?.value||'').toLowerCase(),f=document.getElementById('pantryFilter')?.value||'all'; const list=state.pantry.filter(x=>x.productName.toLowerCase().includes(q)&&(f==='all'||(f==='low'&&x.qty<=x.min)||(f==='exp'&&expiringSoon(x)))); const el=document.getElementById('pantryList'); if(!el)return; el.innerHTML=list.length?list.map(x=>{const ratio=x.min?Math.min(100,(x.qty/(x.min*2))*100):100, days=x.dailyUse?Math.floor(x.qty/x.dailyUse):null, low=x.qty<=x.min; return `<article class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-soft"><div class="flex items-start justify-between"><div><p class="font-semibold">${esc(x.productName)}</p><p class="text-xs text-slate-500">${esc(x.category)} · ${x.qty} ${esc(x.unit)}</p></div><span class="text-xs px-2 py-1 rounded-full ${low?'bg-rose-100 text-rose-700 dark:bg-rose-950/50':'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50'}">${low?'Reponer':'En stock'}</span></div><div class="h-2 rounded-full bg-slate-100 dark:bg-zinc-800 mt-4 overflow-hidden"><div class="progress h-full rounded-full ${low?'bg-rose-500':ratio<60?'bg-amber-500':'bg-blue-500'}" style="width:${ratio}%"></div></div><div class="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-500"><span>Mínimo: ${x.min} ${esc(x.unit)}</span><span>${days!==null?`Dura ~${days} días`:'Sin consumo diario'}</span><span>${x.expiry?`Vence: ${x.expiry}`:'Sin vencimiento'}</span><span>${x.purchaseUnit!==x.unit?`1 ${x.purchaseUnit} ≈ ${x.conversion} ${x.unit}`:'Misma unidad'}</span></div><div class="mt-4 flex gap-2"><button data-consume="${x.id}" class="flex-1 rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 px-3 py-2 text-sm">Consumir</button><button data-reorder="${x.id}" class="rounded-xl bg-slate-100 dark:bg-zinc-800 px-3 py-2 text-sm">Comprar</button><button data-edit-pantry="${x.id}" class="rounded-xl border border-slate-200 dark:border-zinc-700 px-3 py-2"><i data-lucide="pencil" class="w-4 h-4"></i></button></div></article>`}).join(''):`<p class="text-sm text-slate-500 py-10 text-center sm:col-span-2 xl:col-span-3">No hay productos.</p>`; icon(); }
-
-  function renderTasks(){ document.getElementById('tareas').innerHTML=`<div class="flex items-end justify-between gap-3 mb-5"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Pendientes compartidos</p><h2 class="text-3xl font-semibold">Tareas</h2></div><button data-action="add-task" class="rounded-xl bg-indigo-600 text-white px-4 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Nueva</button></div><div class="flex gap-2 overflow-auto scrollbar-hide">${['Todas','Pendientes','Completadas','Tarea','Compra general'].map((x,i)=>`<button class="task-filter shrink-0 rounded-xl px-3 py-2 text-sm ${i===0?'bg-slate-900 text-white dark:bg-white dark:text-slate-900':'bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800'}" data-taskfilter="${x}">${x}</button>`).join('')}</div><div id="taskList" class="mt-4 space-y-2"></div>`; renderTaskList('Todas'); }
-  function renderTaskList(filter){ let list=state.tasks.filter(x=>filter==='Todas'||(filter==='Pendientes'&&!x.done)||(filter==='Completadas'&&x.done)||x.type===filter); const el=document.getElementById('taskList'); el.innerHTML=list.length?list.map(x=>`<article class="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3"><button data-toggle-task="${x.id}" class="w-7 h-7 rounded-lg border ${x.done?'bg-indigo-600 border-indigo-600 text-white':'border-slate-300 dark:border-zinc-700'} grid place-items-center">${x.done?'<i data-lucide="check" class="w-4 h-4"></i>':''}</button><div class="flex-1 min-w-0"><p class="font-medium ${x.done?'line-through text-slate-500':''}">${esc(x.title)}</p><p class="text-xs text-slate-500">${esc(x.type)} · ${esc(x.assigned)} ${x.due?'· '+x.due:''}</p></div><span class="text-xs rounded-full px-2 py-1 ${x.priority==='Alta'?'bg-rose-100 text-rose-700':x.priority==='Media'?'bg-amber-100 text-amber-700':'bg-slate-100 text-slate-600'}">${x.priority}</span><button data-edit-task="${x.id}" class="p-2 text-slate-400"><i data-lucide="pencil" class="w-4 h-4"></i></button><button data-delete-task="${x.id}" class="p-2 text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></article>`).join(''):`<p class="text-sm text-slate-500 py-10 text-center">Sin tareas.</p>`; icon(); }
-
-  function renderCatalog(){ const cats=[...new Set(state.products.map(x=>x.category))]; document.getElementById('catalogo').innerHTML=`<div class="flex items-end justify-between gap-3 mb-5"><div><p class="text-sm text-slate-500 dark:text-zinc-400">Base master editable</p><h2 class="text-3xl font-semibold">Catálogo</h2></div><button data-action="add-product" class="rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 text-sm"><i data-lucide="plus" class="inline w-4 h-4 mr-1"></i>Producto</button></div><div class="flex gap-2"><input id="catalogSearch" placeholder="Buscar producto..." class="flex-1 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 text-sm"><select id="catalogFilter" class="rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-3 text-sm"><option>Todos</option>${cats.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div><div id="catalogList" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 mt-4"></div>`; renderCatalogList(); }
-  function renderCatalogList(){ const q=(document.getElementById('catalogSearch')?.value||'').toLowerCase(), f=document.getElementById('catalogFilter')?.value||'Todos'; const list=state.products.filter(x=>x.name.toLowerCase().includes(q)&&(f==='Todos'||x.category===f)); const el=document.getElementById('catalogList'); el.innerHTML=list.map(x=>`<article class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4"><div class="flex items-start justify-between"><div><p class="font-semibold">${esc(x.name)}</p><p class="text-xs text-slate-500">${esc(x.category)} · ${esc(x.unit)}</p></div><div class="flex"><button data-edit-product="${x.id}" class="p-2 text-slate-400"><i data-lucide="pencil" class="w-4 h-4"></i></button><button data-delete-product="${x.id}" class="p-2 text-rose-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></div><div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs"><div class="rounded-xl bg-slate-50 dark:bg-zinc-800 p-2"><p class="text-slate-500">Mercado</p><p class="font-medium mt-1">${money(x.market)}</p></div><div class="rounded-xl bg-slate-50 dark:bg-zinc-800 p-2"><p class="text-slate-500">Super</p><p class="font-medium mt-1">${money(x.supermarket)}</p></div><div class="rounded-xl bg-slate-50 dark:bg-zinc-800 p-2"><p class="text-slate-500">Mayorista</p><p class="font-medium mt-1">${money(x.wholesale)}</p></div></div><p class="text-xs text-slate-500 mt-3">Despensa: ${esc(x.pantryUnit)} · Conversión: ${x.conversion}</p></article>`).join('')||`<p class="text-sm text-slate-500 py-10 text-center sm:col-span-2 xl:col-span-3">Sin productos.</p>`; icon(); }
-
-  function advisor(){ const t=totals(); const pct=t.inc?Math.round((t.ants/t.inc)*100):0; const q1=periodTotals('Q1'),q2=periodTotals('Q2'); const a=[]; a.push(t.projected<0?`Alerta: la proyección general queda en ${money(t.projected)}.`:`La proyección general deja un margen de ${money(t.projected)}.`); a.push(`Gasto hormiga: ${pct}% de ingresos`); if(q1.balance<0)a.push(`1ra quincena desbalanceada por ${money(Math.abs(q1.balance))}`); if(q2.balance<0)a.push(`Fin de mes desbalanceado por ${money(Math.abs(q2.balance))}`); if(t.pending>state.settings.marketBudget)a.push('El carrito supera el presupuesto de mercado'); if(!a.slice(1).length)a.push('Presupuesto saludable'); return a; }
-
-  function formWrap(fields,submitText='Guardar'){ return `<form id="modalForm" class="space-y-4">${fields}<button class="w-full rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 py-3 font-medium">${submitText}</button></form>`; }
-  const input=(label,name,val='',type='text',extra='')=>`<label class="block"><span class="text-sm text-slate-600 dark:text-zinc-300">${label}</span><input name="${name}" type="${type}" value="${esc(val)}" ${extra} class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3"></label>`;
-  const select=(label,name,opts,val='')=>`<label class="block"><span class="text-sm text-slate-600 dark:text-zinc-300">${label}</span><select name="${name}" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3">${opts.map(o=>`<option ${String(o)===String(val)?'selected':''}>${esc(o)}</option>`).join('')}</select></label>`;
-
-  function openIncome(id){ const x=state.incomes.find(i=>i.id===id)||{person:state.settings.partnerA,type:'Sueldo',amount:'',period:'Q1',date:todayISO(),active:true}; modal(id?'Editar ingreso':'Nuevo ingreso',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${select('Integrante','person',[state.settings.partnerA,state.settings.partnerB],x.person)}${select('Tipo','type',['Sueldo','Bono','Ingreso extra'],x.type)}${input('Monto','amount',x.amount,'number','step="0.01" required')}${select('Periodo','period',['Q1','Q2'],x.period)}${input('Fecha','date',x.date,'date')}</div>`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target)); const obj={...x,...f,amount:Number(f.amount),id:id||uid(),active:true}; id?Object.assign(x,obj):state.incomes.push(obj); save(); closeModal(); renderAll(); toast('Ingreso guardado');}; }
-  function openExpense(id){ const x=state.expenses.find(i=>i.id===id)||{name:'',amount:'',category:'Fijos',period:'Q1',date:todayISO(),note:''}; modal(id?'Editar gasto':'Nuevo gasto',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${input('Descripción','name',x.name,'text','required')}${input('Monto','amount',x.amount,'number','step="0.01" required')}${select('Categoría','category',['Fijos','Diarios','Hormiga','Mercado','Eventuales'],x.category)}${select('Periodo','period',['Q1','Q2'],x.period)}${input('Fecha','date',x.date,'date')}<label class="block sm:col-span-2"><span class="text-sm">Nota</span><textarea name="note" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3">${esc(x.note)}</textarea></label></div>${id?'<button type="button" id="deleteFinance" class="w-full text-rose-600 py-2">Eliminar gasto</button>':''}`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target)); const obj={...x,...f,amount:Number(f.amount),id:id||uid()}; id?Object.assign(x,obj):state.expenses.push(obj); save();closeModal();renderAll();toast('Gasto guardado');}; if(id)document.getElementById('deleteFinance').onclick=()=>{state.expenses=state.expenses.filter(i=>i.id!==id);save();closeModal();renderAll();}; }
-  function openCart(id){ const x=state.cart.find(i=>i.id===id)||{productName:'',category:'Otros',qty:1,unit:'unidades',price:0,store:'market',done:false,date:todayISO()}; const names=state.products.map(p=>p.name); modal(id?'Editar producto':'Agregar al mercado',formWrap(`<div class="grid sm:grid-cols-2 gap-4"><label class="block sm:col-span-2"><span class="text-sm">Producto</span><input list="productNames" name="productName" value="${esc(x.productName)}" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3"><datalist id="productNames">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>${input('Cantidad','qty',x.qty,'number','step="0.01" required')}${select('Unidad','unit',['kg','g','L','ml','unidades','paquetes','bolsas','botellas'],x.unit)}${select('Categoría','category',['Frutas','Cítricos','Verduras','Abarrotes','Lácteos','Limpieza','Menaje','Otros'],x.category)}${select('Referencia','store',['market','supermarket','wholesale'],x.store)}${input('Precio por unidad','price',x.price,'number','step="0.01" required')}${input('Fecha','date',x.date,'date')}</div>${id?'<button type="button" id="deleteCartModal" class="w-full text-rose-600 py-2">Eliminar producto</button>':''}`)); const form=document.getElementById('modalForm'); const nameInput=form.elements.productName; function syncProduct(){const p=state.products.find(p=>p.name.toLowerCase()===nameInput.value.trim().toLowerCase());if(p){form.elements.category.value=p.category;form.elements.unit.value=p.unit;form.elements.price.value=p[form.elements.store.value]||p.market;}} nameInput.addEventListener('change',syncProduct); form.elements.store.addEventListener('change',syncProduct); form.onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,qty:Number(f.qty),price:Number(f.price),id:id||uid(),done:x.done||false};id?Object.assign(x,obj):state.cart.push(obj);save();closeModal();renderAll();toast('Mercado actualizado');}; if(id)document.getElementById('deleteCartModal').onclick=()=>{deleteCart(id);closeModal();}; }
-  function openPantry(id){ const x=state.pantry.find(i=>i.id===id)||{productName:'',category:'Otros',qty:0,unit:'unidades',min:1,dailyUse:0,expiry:'',conversion:1,purchaseUnit:'unidades'}; modal(id?'Editar despensa':'Agregar a despensa',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${input('Producto','productName',x.productName,'text','required')}${select('Categoría','category',['Frutas','Cítricos','Verduras','Abarrotes','Lácteos','Limpieza','Otros'],x.category)}${input('Stock actual','qty',x.qty,'number','step="0.01" required')}${select('Unidad en despensa','unit',['kg','g','L','ml','unidades','paquetes','bolsas','botellas'],x.unit)}${input('Stock mínimo','min',x.min,'number','step="0.01"')}${input('Consumo diario','dailyUse',x.dailyUse,'number','step="0.01"')}${input('Fecha de vencimiento','expiry',x.expiry,'date')}${select('Unidad de compra','purchaseUnit',['kg','g','L','ml','unidades','paquetes','bolsas','botellas'],x.purchaseUnit)}${input('Conversión por unidad de compra','conversion',x.conversion,'number','step="0.01"')}</div>${id?'<button type="button" id="deletePantry" class="w-full text-rose-600 py-2">Eliminar de despensa</button>':''}`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,qty:Number(f.qty),min:Number(f.min),dailyUse:Number(f.dailyUse),conversion:Number(f.conversion),id:id||uid()};id?Object.assign(x,obj):state.pantry.push(obj);save();closeModal();renderAll();toast('Despensa actualizada');}; if(id)document.getElementById('deletePantry').onclick=()=>{state.pantry=state.pantry.filter(i=>i.id!==id);save();closeModal();renderAll();}; }
-  function openConsume(id){ const x=state.pantry.find(i=>i.id===id); modal('Registrar consumo',formWrap(`<p class="text-sm text-slate-500">Disponible: <strong>${x.qty} ${esc(x.unit)}</strong></p><div class="grid sm:grid-cols-2 gap-4 mt-4">${input('Cantidad consumida','amount',1,'number','step="0.01" required')}${select('Unidad','consumeUnit',compatibleUnits(x.unit),x.unit)}</div>`,'Descontar')); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));let amount=convert(Number(f.amount),f.consumeUnit,x.unit); if(amount>x.qty)return toast('No hay suficiente stock');x.qty=Math.max(0,x.qty-amount);save();closeModal();renderAll();toast('Consumo registrado');}; }
-  function compatibleUnits(u){ if(['kg','g'].includes(u))return ['kg','g']; if(['L','ml'].includes(u))return ['L','ml']; return [u]; }
-  function convert(a,from,to){ if(from===to)return a; if(from==='g'&&to==='kg')return a/1000;if(from==='kg'&&to==='g')return a*1000;if(from==='ml'&&to==='L')return a/1000;if(from==='L'&&to==='ml')return a*1000;return a; }
-  function openTask(id){ const x=state.tasks.find(i=>i.id===id)||{title:'',type:'Tarea',assigned:'Ambos',due:'',priority:'Media',done:false}; modal(id?'Editar tarea':'Nueva tarea',formWrap(`<div class="grid sm:grid-cols-2 gap-4"><div class="sm:col-span-2">${input('Título','title',x.title,'text','required')}</div>${select('Tipo','type',['Tarea','Compra general'],x.type)}${select('Responsable','assigned',[state.settings.partnerA,state.settings.partnerB,'Ambos'],x.assigned)}${input('Vencimiento','due',x.due,'date')}${select('Prioridad','priority',['Alta','Media','Baja'],x.priority)}</div>`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,id:id||uid()};id?Object.assign(x,obj):state.tasks.push(obj);save();closeModal();renderAll();}; }
-  function openProduct(id){ const x=state.products.find(i=>i.id===id)||{name:'',category:'Otros',unit:'unidades',market:0,supermarket:0,wholesale:0,pantryUnit:'unidades',conversion:1}; modal(id?'Editar producto master':'Nuevo producto master',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${input('Nombre','name',x.name,'text','required')}${select('Categoría','category',['Frutas','Cítricos','Verduras','Abarrotes','Lácteos','Limpieza','Menaje','Otros'],x.category)}${select('Unidad de compra','unit',['kg','g','L','ml','unidades','paquetes','bolsas','botellas'],x.unit)}${input('Precio mercado','market',x.market,'number','step="0.01"')}${input('Precio supermercado','supermarket',x.supermarket,'number','step="0.01"')}${input('Precio mayorista','wholesale',x.wholesale,'number','step="0.01"')}${select('Unidad de despensa','pantryUnit',['kg','g','L','ml','unidades','paquetes','bolsas','botellas'],x.pantryUnit)}${input('Conversión','conversion',x.conversion,'number','step="0.01"')}</div>`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,market:Number(f.market),supermarket:Number(f.supermarket),wholesale:Number(f.wholesale),conversion:Number(f.conversion),id:id||uid()};id?Object.assign(x,obj):state.products.push(obj);save();closeModal();renderAll();}; }
-
-  function toggleCart(id){ const x=state.cart.find(i=>i.id===id); if(!x)return; if(!x.done){ const paid=prompt('Total real pagado',String((x.qty*x.price).toFixed(2))); if(paid===null)return; x.actualTotal=Number(paid)||x.qty*x.price; x.done=true; state.expenses.push({id:uid(),name:`Mercado: ${x.productName}`,amount:x.actualTotal,category:'Mercado',period:new Date().getDate()<=15?'Q1':'Q2',date:todayISO(),note:'Generado desde Mercado',sourceCartId:x.id}); const p=state.products.find(p=>p.name.toLowerCase()===x.productName.toLowerCase()); const pantryQty=p&&p.pantryUnit!==p.unit?x.qty*(p.conversion||1):x.qty; const existing=state.pantry.find(p=>p.productName.toLowerCase()===x.productName.toLowerCase()); if(existing) existing.qty+=pantryQty; else state.pantry.push({id:uid(),productName:x.productName,category:x.category,qty:pantryQty,unit:p?.pantryUnit||x.unit,min:1,dailyUse:0,expiry:'',conversion:p?.conversion||1,purchaseUnit:x.unit}); } else { x.done=false; state.expenses=state.expenses.filter(e=>e.sourceCartId!==x.id); }
-    save();renderAll();
-  }
-  function deleteCart(id){ state.cart=state.cart.filter(i=>i.id!==id); state.expenses=state.expenses.filter(e=>e.sourceCartId!==id); save();renderAll(); }
-  function reorder(id){ const x=state.pantry.find(i=>i.id===id); const needed=Math.max(1,x.min*2-x.qty); const qty=x.purchaseUnit!==x.unit?needed/(x.conversion||1):needed; const p=state.products.find(p=>p.name.toLowerCase()===x.productName.toLowerCase()); state.cart.push({id:uid(),productName:x.productName,category:x.category,qty:Number(qty.toFixed(2)),unit:x.purchaseUnit,price:p?.market||0,store:'market',done:false,date:todayISO()}); save();renderAll();toast('Agregado al mercado'); }
-  function shareCart(){ const groups={}; state.cart.filter(x=>!x.done).forEach(x=>(groups[x.category]??=[]).push(x)); const text=['🛒 LISTA DE COMPRAS · NUESTROESPACIO','',...Object.entries(groups).flatMap(([c,a])=>[`${c.toUpperCase()}:`,...a.map(x=>`☐ ${x.productName} — ${x.qty} ${x.unit}`),'']),`Estimado: ${money(totals().pending)}`].join('\n'); if(navigator.share)navigator.share({title:'Lista de compras',text}).catch(()=>{}); else navigator.clipboard.writeText(text).then(()=>toast('Lista copiada')); }
-
-  function renderAll(){ renderDashboard(); renderFinances(); renderMarket(); renderPantry(); renderTasks(); renderCatalog(); icon(); applyTheme(); }
-  function showView(v){ currentView=v; document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===v)); document.querySelectorAll('.nav-btn').forEach(b=>{const on=b.dataset.view===v;b.className=`nav-btn text-xs py-2 rounded-xl ${on?'text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-900':'text-slate-500 dark:text-zinc-400'}`}); window.scrollTo({top:0,behavior:'smooth'}); icon(); }
-  function applyTheme(){ const dark=state.settings.theme==='dark'; document.documentElement.classList.toggle('dark',dark); document.getElementById('themeBtn').innerHTML=`<i data-lucide="${dark?'sun':'moon'}" class="w-4 h-4"></i>`; icon(); }
-
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b)return;
-    if(b.classList.contains('nav-btn')) showView(b.dataset.view);
-    if(b.dataset.viewJump) showView(b.dataset.viewJump);
-    const a=b.dataset.action; if(a==='add-income')openIncome(); if(a==='add-expense')openExpense(); if(a==='add-cart')openCart(); if(a==='add-pantry')openPantry(); if(a==='add-task')openTask(); if(a==='add-product')openProduct(); if(a==='share-cart')shareCart(); if(a==='quick-summary')modal('Análisis inteligente',advisor().map(x=>`<div class="p-3 rounded-xl bg-slate-100 dark:bg-zinc-800 mb-2">${esc(x)}</div>`).join(''));
-    if(b.dataset.editFinance){const [k,id]=b.dataset.editFinance.split(':');k==='Ingreso'?openIncome(id):openExpense(id)}
-    if(b.dataset.toggleCart)toggleCart(b.dataset.toggleCart); if(b.dataset.editCart)openCart(b.dataset.editCart); if(b.dataset.deleteCart)deleteCart(b.dataset.deleteCart);
-    if(b.dataset.consume)openConsume(b.dataset.consume); if(b.dataset.reorder)reorder(b.dataset.reorder); if(b.dataset.editPantry)openPantry(b.dataset.editPantry);
-    if(b.dataset.toggleTask){const x=state.tasks.find(i=>i.id===b.dataset.toggleTask);x.done=!x.done;save();renderAll();} if(b.dataset.editTask)openTask(b.dataset.editTask); if(b.dataset.deleteTask){state.tasks=state.tasks.filter(i=>i.id!==b.dataset.deleteTask);save();renderAll();}
-    if(b.dataset.editProduct)openProduct(b.dataset.editProduct); if(b.dataset.deleteProduct){state.products=state.products.filter(i=>i.id!==b.dataset.deleteProduct);save();renderAll();}
-    if(b.classList.contains('market-cat')){document.querySelectorAll('.market-cat').forEach(x=>x.className='market-cat shrink-0 px-3 py-2 rounded-xl text-sm bg-slate-100 dark:bg-zinc-800');b.className='market-cat shrink-0 px-3 py-2 rounded-xl text-sm bg-slate-900 text-white dark:bg-white dark:text-slate-900';renderCart(b.dataset.cat)}
-    if(b.classList.contains('task-filter')){document.querySelectorAll('.task-filter').forEach(x=>x.className='task-filter shrink-0 rounded-xl px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800');b.className='task-filter shrink-0 rounded-xl px-3 py-2 text-sm bg-slate-900 text-white dark:bg-white dark:text-slate-900';renderTaskList(b.dataset.taskfilter)}
-  });
-  document.addEventListener('input',e=>{ if(e.target.id==='financeSearch')renderFinanceList(); if(e.target.id==='pantrySearch')renderPantryList(); if(e.target.id==='catalogSearch')renderCatalogList(); });
-  document.addEventListener('change',e=>{ if(e.target.id==='financeFilter')renderFinanceList(); if(e.target.id==='marketStatus')renderCart(document.querySelector('.market-cat.bg-slate-900')?.dataset.cat||'Todos'); if(e.target.id==='pantryFilter')renderPantryList(); if(e.target.id==='catalogFilter')renderCatalogList(); });
-  document.getElementById('modalClose').onclick=closeModal; document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
-  document.getElementById('themeBtn').onclick=()=>{state.settings.theme=state.settings.theme==='dark'?'light':'dark';save();applyTheme();};
-  document.getElementById('backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='nuestroespacio-respaldo.json';a.click();URL.revokeObjectURL(a.href)};
-  document.getElementById('fab').onclick=()=>{({dashboard:openTask,finanzas:openExpense,mercado:openCart,despensa:openPantry,tareas:openTask,catalogo:openProduct}[currentView]||openTask)()};
-
-  renderAll();
-})();
-</script>
+  <script src="products.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
