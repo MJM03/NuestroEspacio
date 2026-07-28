@@ -1,4 +1,4 @@
-# NuestroEspacio Perú v2.3
+# NuestroEspacio Perú v2.4 PWA
 
 Aplicación web responsive para administrar en pareja las finanzas del hogar, el mercado, la despensa, recetas peruanas, tareas y configuraciones familiares.
 
@@ -12,8 +12,31 @@ Todos los archivos deben subirse directamente a la raíz del repositorio de GitH
 - `recipes.js`
 - `app.js`
 - `README.md`
+- `manifest.webmanifest`
+- `sw.js`
+- `pwa.js`
+- `icon-192.png`
+- `icon-512.png`
+- `icon-maskable-512.png`
+- `favicon.png`
 
-No requiere instalación, compilación ni servidor. Abre `index.html` o publica el repositorio mediante GitHub Pages.
+No requiere compilación. Para usar todas las funciones PWA debe publicarse mediante HTTPS, por ejemplo con GitHub Pages. Después de la primera carga online puede abrirse sin conexión.
+
+
+## Instalación como PWA
+
+### iPhone / iPad
+
+1. Abre la web publicada en Safari.
+2. Toca **Compartir**.
+3. Selecciona **Agregar a pantalla de inicio**.
+4. Abre NuestroEspacio desde el nuevo icono.
+
+### Android / escritorio
+
+Usa el botón de instalación de la cabecera o selecciona **Instalar aplicación** desde el menú de Chrome o Edge.
+
+La PWA incluye `manifest.webmanifest`, iconos, accesos rápidos y un Service Worker con caché versionada.
 
 ## Persistencia
 
@@ -90,5 +113,5 @@ Esta versión unifica las cifras financieras con una sola fuente contable:
 
 ## Versión
 
-**NuestroEspacio Perú v2.3**  
-Actualización centrada en conciliación financiera, consistencia de gastos, presupuesto de Mercado y documentación Markdown.
+**NuestroEspacio Perú v2.4 PWA**  
+Añade instalación en iPhone, Android y escritorio, funcionamiento offline, iconos, manifest y actualización mediante Service Worker.

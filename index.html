@@ -4,8 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="NuestroEspacio" />
+  <meta name="application-name" content="NuestroEspacio Perú" />
+  <meta name="format-detection" content="telephone=no" />
   <meta name="description" content="NuestroEspacio Perú: finanzas en soles, mercado, despensa y tareas compartidas para parejas." />
-  <title>NuestroEspacio Perú v2.3</title>
+  <title>NuestroEspacio Perú v2.4 PWA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -20,6 +26,9 @@
   </script>
   <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-slate-100 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans">
@@ -29,9 +38,10 @@
         <div class="w-10 h-10 rounded-2xl bg-slate-900 dark:bg-white grid place-items-center text-white dark:text-slate-900 shadow-soft"><i data-lucide="house-heart" class="w-5 h-5"></i></div>
         <div class="min-w-0 flex-1">
           <h1 class="font-semibold tracking-tight">NuestroEspacio</h1>
-          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-zinc-400">Centro compartido del hogar · Perú · v2.3</p>
+          <p id="headerSubtitle" class="text-xs text-slate-500 dark:text-zinc-400">Centro compartido del hogar · Perú · v2.4 PWA</p>
         </div>
         <button id="themeBtn" class="w-10 h-10 rounded-xl border border-slate-200 dark:border-zinc-800 grid place-items-center hover:bg-slate-50 dark:hover:bg-zinc-900" aria-label="Cambiar tema"><i data-lucide="moon" class="w-4 h-4"></i></button>
+        <button id="installBtn" class="hidden w-10 h-10 rounded-xl border border-slate-200 dark:border-zinc-800 place-items-center hover:bg-slate-50 dark:hover:bg-zinc-900" aria-label="Instalar aplicación"><i data-lucide="smartphone" class="w-4 h-4"></i></button>
         <button id="backupBtn" class="hidden sm:grid w-10 h-10 rounded-xl border border-slate-200 dark:border-zinc-800 place-items-center hover:bg-slate-50 dark:hover:bg-zinc-900" aria-label="Exportar respaldo"><i data-lucide="download" class="w-4 h-4"></i></button>
       </div>
     </header>
@@ -77,5 +87,6 @@
   <script src="products.js"></script>
   <script src="recipes.js"></script>
   <script src="app.js"></script>
+  <script src="pwa.js"></script>
 </body>
 </html>

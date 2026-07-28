@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "NuestroEspacio Perú",
+  "short_name": "NuestroEspacio",
+  "description": "Finanzas, mercado, despensa, recetas y tareas para organizar el hogar en pareja.",
+  "lang": "es-PE",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "categories": ["finance", "productivity", "lifestyle", "food"],
+  "icons": [
+    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Mercado","short_name":"Mercado","url":"./index.html#mercado","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Despensa","short_name":"Despensa","url":"./index.html#despensa","icons":[{"src":"icon-192.png","sizes":"192x192"}]},
+    {"name":"Finanzas","short_name":"Finanzas","url":"./index.html#finanzas","icons":[{"src":"icon-192.png","sizes":"192x192"}]}
+  ]
+}
