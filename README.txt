@@ -16,3 +16,11 @@ NOVEDADES
 - Ingredientes faltantes se agregan al mercado descontando lo que ya existe en despensa.
 
 Uso: subir todos los archivos a la raíz de GitHub Pages.
+
+VERSIÓN 2.1 — CORRECCIONES
+- Conversión inteligente de recetas a presentaciones reales de compra.
+- Ají amarillo: unidades → kg usando equivalencia aproximada de 10 unidades/kg.
+- Leche evaporada: ml → latas de 400 ml.
+- Pan de molde: rebanadas → paquetes de 20 rebanadas.
+- Presentaciones cerradas se redondean hacia arriba.
+- Modo oscuro pulido con negro profundo #0B0B0F, contraste y formularios corregidos.
