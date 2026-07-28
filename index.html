@@ -41,20 +41,24 @@
       <section id="finanzas" class="view"></section>
       <section id="mercado" class="view"></section>
       <section id="despensa" class="view"></section>
+      <section id="recetas" class="view"></section>
       <section id="tareas" class="view"></section>
+      <section id="configuracion" class="view"></section>
       <section id="catalogo" class="view"></section>
     </main>
 
     <button id="fab" class="fixed right-5 bottom-24 z-40 w-14 h-14 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-2xl grid place-items-center active:scale-95 transition"><i data-lucide="plus" class="w-6 h-6"></i></button>
 
     <nav class="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200/80 bg-white/90 dark:border-zinc-800 dark:bg-zinc-950/90 glass nav-safe">
-      <div class="mx-auto max-w-3xl px-2 pt-2 grid grid-cols-6 gap-1">
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-900" data-view="dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5 mx-auto mb-1"></i>Inicio</button>
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="finanzas"><i data-lucide="wallet-cards" class="w-5 h-5 mx-auto mb-1"></i>Finanzas</button>
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="mercado"><i data-lucide="shopping-cart" class="w-5 h-5 mx-auto mb-1"></i>Mercado</button>
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="despensa"><i data-lucide="package-open" class="w-5 h-5 mx-auto mb-1"></i>Despensa</button>
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="tareas"><i data-lucide="check-square-2" class="w-5 h-5 mx-auto mb-1"></i>Tareas</button>
-        <button class="nav-btn text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="catalogo"><i data-lucide="database" class="w-5 h-5 mx-auto mb-1"></i>Catálogo</button>
+      <div class="mx-auto max-w-5xl px-2 pt-2 flex gap-1 overflow-x-auto scrollbar-hide">
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-900" data-view="dashboard"><i data-lucide="layout-dashboard" class="w-5 h-5 mx-auto mb-1"></i>Inicio</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="finanzas"><i data-lucide="wallet-cards" class="w-5 h-5 mx-auto mb-1"></i>Finanzas</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="mercado"><i data-lucide="shopping-cart" class="w-5 h-5 mx-auto mb-1"></i>Mercado</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="despensa"><i data-lucide="package-open" class="w-5 h-5 mx-auto mb-1"></i>Despensa</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="recetas"><i data-lucide="chef-hat" class="w-5 h-5 mx-auto mb-1"></i>Recetas</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="tareas"><i data-lucide="check-square-2" class="w-5 h-5 mx-auto mb-1"></i>Tareas</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="configuracion"><i data-lucide="settings-2" class="w-5 h-5 mx-auto mb-1"></i>Ajustes</button>
+        <button class="nav-btn min-w-[72px] flex-1 text-xs py-2 rounded-xl text-slate-500 dark:text-zinc-400" data-view="catalogo"><i data-lucide="database" class="w-5 h-5 mx-auto mb-1"></i>Catálogo</button>
       </div>
     </nav>
   </div>
@@ -71,6 +75,7 @@
 
   <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-28 z-[60] hidden max-w-[90vw] rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-3 shadow-2xl text-sm"></div>
   <script src="products.js"></script>
+  <script src="recipes.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

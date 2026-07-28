@@ -1,17 +1,18 @@
-NUESTROESPACIO PERÚ
+NUESTROESPACIO PERÚ v2
 
-Archivos para subir juntos a la raíz de GitHub Pages:
+Archivos en raíz, sin carpetas:
 - index.html
 - styles.css
 - products.js
+- recipes.js
 - app.js
 
-Características de esta edición:
-- Moneda: sol peruano (PEN / S/)
-- Formato regional: es-PE
-- Catálogo maestro de 394 productos comunes en Perú
-- Precios referenciales para mercado, supermercado y mayorista
-- Precios editables desde Catálogo Perú
-- Migración automática: conserva los datos existentes de localStorage y añade productos faltantes
+NOVEDADES
+- Configuración del hogar: integrantes, número de personas, presupuesto y gasto hormiga estimado.
+- Sueldos y gastos fijos editables desde Ajustes.
+- Compras realizadas se convierten automáticamente a la unidad de despensa.
+- Duración de stock ajustada por número de personas.
+- Recetas peruanas de Costa, Sierra y Selva, escalables de 1 a 12 personas.
+- Ingredientes faltantes se agregan al mercado descontando lo que ya existe en despensa.
 
-IMPORTANTE: Los precios son estimaciones referenciales para Lima y pueden variar por distrito, temporada, marca, presentación y promociones. No existe una base estática capaz de contener literalmente todos los productos y precios del país; el catálogo incluido cubre categorías de consumo frecuente y permite crear cualquier producto adicional.
+Uso: subir todos los archivos a la raíz de GitHub Pages.
