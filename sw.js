@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nuestroespacio-peru-v2.4.0';
+const CACHE_NAME = 'nuestroespacio-peru-v2.4.1';
 const APP_SHELL = [
   './',
   './index.html',

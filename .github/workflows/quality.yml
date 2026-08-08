@@ -1,0 +1,44 @@
+name: Quality
+
+on:
+  push:
+    branches:
+      - main
+      - "agent/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JavaScript syntax
+        run: |
+          node --check app.js
+          node --check products.js
+          node --check recipes.js
+          node --check pwa.js
+          node --check sw.js
+
+      - name: Validate web manifest
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest', 'utf8'))"
+
+      - name: Verify PWA shell files
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in index.html styles.css products.js recipes.js app.js pwa.js sw.js manifest.webmanifest icon-192.png icon-512.png icon-maskable-512.png favicon.png; do
+            test -f "$file" || { echo "Missing required PWA file: $file"; exit 1; }
+          done
+
+      - name: Verify release version consistency
+        shell: bash
+        run: |
+          grep -q "APP_VERSION='2.4.1'" app.js
+          grep -q "v2.4.1 PWA" index.html
+          grep -q "nuestroespacio-peru-v2.4.1" sw.js

@@ -1,4 +1,4 @@
-# NuestroEspacio Perú v2.4 PWA
+# NuestroEspacio Perú v2.4.1 PWA
 
 Aplicación web responsive para administrar en pareja las finanzas del hogar, el mercado, la despensa, recetas peruanas, tareas y configuraciones familiares.
 
@@ -113,5 +113,14 @@ Esta versión unifica las cifras financieras con una sola fuente contable:
 
 ## Versión
 
-**NuestroEspacio Perú v2.4 PWA**  
-Añade instalación en iPhone, Android y escritorio, funcionamiento offline, iconos, manifest y actualización mediante Service Worker.
+**NuestroEspacio Perú v2.4.1 PWA**  
+Mantiene la instalación en iPhone, Android y escritorio, funcionamiento offline, iconos, manifest y actualización mediante Service Worker.
+
+### Correcciones v2.4.1
+
+- Usa la fecha civil de Perú para movimientos, quincenas y reportes.
+- Revierte el stock de despensa al devolver una compra a estado pendiente.
+- Evita editar cantidad, producto o unidad de una compra finalizada sin revertirla primero.
+- Conserva correctamente ingredientes consolidados de varias recetas.
+- Guarda una copia de recuperación si los datos locales no pueden migrarse.
+- Incorpora validaciones automáticas de JavaScript, manifest y archivos esenciales mediante GitHub Actions.
