@@ -1,9 +1,13 @@
 (() => {
 'use strict';
   const KEY='nuestroEspacio_v1';
-  const APP_VERSION='2.3';
+  const APP_VERSION='2.4.1';
   const money = n => new Intl.NumberFormat('es-PE',{style:'currency',currency:'PEN',minimumFractionDigits:2}).format(Number(n||0));
-  const todayISO = () => new Date().toISOString().slice(0,10);
+  const todayISO = () => {
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Lima',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const values=Object.fromEntries(parts.map(part=>[part.type,part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+  };
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2);
   const esc = s => String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
   const UNITS=['kg','g','L','ml','unidades','rebanadas','porciones','paquetes','bolsas','botellas','cajas','bandejas','atados','latas','frascos','docenas','juegos','rollos','barras','sobres','pares'];
@@ -130,6 +134,8 @@
       s.settings={...seed.settings,...(s.settings||{}),currency:'PEN',country:'PE',peopleCount:Math.max(1,Number(s.settings?.peopleCount||2))};
       s.recipeFavorites=Array.isArray(s.recipeFavorites)?s.recipeFavorites:[];
       s.products=Array.isArray(s.products)?s.products:[];
+      s.pantry=Array.isArray(s.pantry)?s.pantry:[];
+      s.tasks=Array.isArray(s.tasks)?s.tasks:[];
       const byName=new Map(s.products.map(p=>[normalizeText(p.name),p]));
       window.NE_PRODUCTS.forEach(master=>{
         const current=byName.get(normalizeText(master.name));
@@ -164,9 +170,21 @@
       reconcileFinancialState(s);
       s.version=Math.max(2.3,Number(s.version||1));
       return s;
-    } catch { return structuredClone(seed); }
+    } catch(error) {
+      const raw=localStorage.getItem(KEY);
+      if(raw){
+        const recoveryKey=`${KEY}_recovery_${Date.now()}`;
+        try { localStorage.setItem(recoveryKey,raw); }
+        catch(recoveryError){ console.error('No se pudo conservar el respaldo de recuperación:',recoveryError); }
+      }
+      console.error('No se pudieron cargar los datos guardados:',error);
+      return structuredClone(seed);
+    }
   }
-  function save(){ localStorage.setItem(KEY,JSON.stringify(state)); }
+  function save(){
+    try { localStorage.setItem(KEY,JSON.stringify(state)); }
+    catch(error){ console.error('No se pudieron guardar los datos:',error); toast('No se pudieron guardar los cambios. Exporta un respaldo antes de continuar.'); }
+  }
   function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.remove('hidden'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.add('hidden'),2400); }
   function icon(){ lucide.createIcons(); }
   function modal(title,html){ document.getElementById('modalTitle').textContent=title; document.getElementById('modalBody').innerHTML=html; document.getElementById('modal').classList.add('open'); icon(); }
@@ -419,8 +437,14 @@
       const plan=ingredientPurchasePlan(i.name,missing,i.unit,true);
       const p=plan.product; const qty=plan.qty; const unit=plan.unit;
       const existing=state.cart.find(x=>!x.done&&normalizeText(x.productName)===normalizeText(i.name)&&x.unit===unit);
-      if(existing) existing.qty=Number(existing.qty)+qty;
-      else state.cart.push({id:uid(),productName:i.name,productId:p?.id||null,category:p?.category||'Otros',qty:Number(qty.toFixed(3)),unit,price:Number(p?.market||0),store:'market',done:false,date:todayISO(),recipeId:r.id,recipeSourceQty:missing,recipeSourceUnit:i.unit,conversionNote:plan.note});
+      if(existing) {
+        existing.qty=Number(existing.qty)+qty;
+        if(existing.recipeSourceUnit&&Number.isFinite(Number(existing.recipeSourceQty))){
+          const previous=ingredientConvert(i.name,Number(existing.recipeSourceQty),existing.recipeSourceUnit,i.unit);
+          if(previous!==null){existing.recipeSourceQty=previous+missing;existing.recipeSourceUnit=i.unit;}
+          else {delete existing.recipeSourceQty;delete existing.recipeSourceUnit;}
+        }
+      } else state.cart.push({id:uid(),productName:i.name,productId:p?.id||null,category:p?.category||'Otros',qty:Number(qty.toFixed(3)),unit,price:Number(p?.market||0),store:'market',done:false,date:todayISO(),recipeId:r.id,recipeSourceQty:missing,recipeSourceUnit:i.unit,conversionNote:plan.note});
       if(plan.note)conversionNotes.push(`${i.name}: ${fmtQty(missing)} ${i.unit} → ${fmtQty(qty)} ${unit}`);
       added++;
     });
@@ -460,7 +484,7 @@
     };
     if(id&&!linked)document.getElementById('deleteFinance').onclick=()=>{state.expenses=state.expenses.filter(i=>i.id!==id);save();closeModal();renderAll();};
   }
-  function openCart(id){ const x=state.cart.find(i=>i.id===id)||{productName:'',category:'Otros',qty:1,unit:'unidades',price:0,store:'market',done:false,date:todayISO()}; const names=state.products.map(p=>p.name); modal(id?'Editar producto':'Agregar al mercado',formWrap(`<div class="grid sm:grid-cols-2 gap-4"><label class="block sm:col-span-2"><span class="text-sm">Producto</span><input list="productNames" name="productName" value="${esc(x.productName)}" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3"><datalist id="productNames">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>${input('Cantidad','qty',x.qty,'number','step="0.01" required')}${select('Unidad','unit',UNITS,x.unit)}${select('Categoría','category',CATEGORY_OPTIONS,x.category)}${select('Referencia','store',[{value:'market',label:'Mercado local'},{value:'supermarket',label:'Supermercado'},{value:'wholesale',label:'Mayorista'}],x.store)}${input('Precio por unidad','price',x.price,'number','step="0.01" required')}${input('Fecha','date',x.date,'date')}</div>${id?'<button type="button" id="deleteCartModal" class="w-full text-rose-600 py-2">Eliminar producto</button>':''}`)); const form=document.getElementById('modalForm'); const nameInput=form.elements.productName; function syncProduct(){const p=productFor(nameInput.value.trim());if(p){form.elements.category.value=p.category;form.elements.unit.value=p.unit;form.elements.price.value=p[form.elements.store.value]||p.market;}} nameInput.addEventListener('change',syncProduct); form.elements.store.addEventListener('change',syncProduct); form.onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,qty:Number(f.qty),price:Number(f.price),id:id||uid(),done:x.done||false};id?Object.assign(x,obj):state.cart.push(obj);save();closeModal();renderAll();toast('Mercado actualizado');}; if(id)document.getElementById('deleteCartModal').onclick=()=>{deleteCart(id);closeModal();}; }
+  function openCart(id){ const x=state.cart.find(i=>i.id===id)||{productName:'',category:'Otros',qty:1,unit:'unidades',price:0,store:'market',done:false,date:todayISO()}; const names=state.products.map(p=>p.name); modal(id?'Editar producto':'Agregar al mercado',formWrap(`<div class="grid sm:grid-cols-2 gap-4"><label class="block sm:col-span-2"><span class="text-sm">Producto</span><input list="productNames" name="productName" value="${esc(x.productName)}" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent px-3 py-3"><datalist id="productNames">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist></label>${input('Cantidad','qty',x.qty,'number','step="0.01" required')}${select('Unidad','unit',UNITS,x.unit)}${select('Categoría','category',CATEGORY_OPTIONS,x.category)}${select('Referencia','store',[{value:'market',label:'Mercado local'},{value:'supermarket',label:'Supermercado'},{value:'wholesale',label:'Mayorista'}],x.store)}${input('Precio por unidad','price',x.price,'number','step="0.01" required')}${input('Fecha','date',x.date,'date')}</div>${id?'<button type="button" id="deleteCartModal" class="w-full text-rose-600 py-2">Eliminar producto</button>':''}`)); const form=document.getElementById('modalForm'); const nameInput=form.elements.productName; function syncProduct(){const p=productFor(nameInput.value.trim());if(p){form.elements.category.value=p.category;form.elements.unit.value=p.unit;form.elements.price.value=p[form.elements.store.value]||p.market;}} nameInput.addEventListener('change',syncProduct); form.elements.store.addEventListener('change',syncProduct); form.onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,qty:Number(f.qty),price:Number(f.price),id:id||uid(),done:x.done||false};if(x.done&&(normalizeText(obj.productName)!==normalizeText(x.productName)||obj.qty!==Number(x.qty)||obj.unit!==x.unit))return toast('Vuelve la compra a pendiente antes de cambiar producto, cantidad o unidad');id?Object.assign(x,obj):state.cart.push(obj);if(obj.done)reconcileFinancialState(state);save();closeModal();renderAll();toast('Mercado actualizado');}; if(id)document.getElementById('deleteCartModal').onclick=()=>{deleteCart(id);closeModal();}; }
   function openPantry(id){ const x=state.pantry.find(i=>i.id===id)||{productName:'',category:'Otros',qty:0,unit:'unidades',min:1,dailyUse:0,expiry:'',conversion:1,purchaseUnit:'unidades'}; modal(id?'Editar despensa':'Agregar a despensa',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${input('Producto','productName',x.productName,'text','required')}${select('Categoría','category',CATEGORY_OPTIONS,x.category)}${input('Stock actual','qty',x.qty,'number','step="0.01" required')}${select('Unidad en despensa','unit',UNITS,x.unit)}${input('Stock mínimo','min',x.min,'number','step="0.01"')}${input('Consumo diario por persona','dailyUse',x.dailyUse,'number','step="0.01"')}${input('Fecha de vencimiento','expiry',x.expiry,'date')}${select('Unidad de compra','purchaseUnit',UNITS,x.purchaseUnit)}${input('Conversión por unidad de compra','conversion',x.conversion,'number','step="0.01"')}</div>${id?'<button type="button" id="deletePantry" class="w-full text-rose-600 py-2">Eliminar de despensa</button>':''}`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,qty:Number(f.qty),min:Number(f.min),dailyUse:Number(f.dailyUse),conversion:Number(f.conversion),id:id||uid()};id?Object.assign(x,obj):state.pantry.push(obj);save();closeModal();renderAll();toast('Despensa actualizada');}; if(id)document.getElementById('deletePantry').onclick=()=>{state.pantry=state.pantry.filter(i=>i.id!==id);save();closeModal();renderAll();}; }
   function openConsume(id){ const x=state.pantry.find(i=>i.id===id); modal('Registrar consumo',formWrap(`<p class="text-sm text-slate-500">Disponible: <strong>${x.qty} ${esc(x.unit)}</strong></p><div class="grid sm:grid-cols-2 gap-4 mt-4">${input('Cantidad consumida','amount',1,'number','step="0.01" required')}${select('Unidad','consumeUnit',compatibleUnits(x.unit),x.unit)}</div>`,'Descontar')); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));let amount=convert(Number(f.amount),f.consumeUnit,x.unit); if(amount>x.qty)return toast('No hay suficiente stock');x.qty=Math.max(0,x.qty-amount);save();closeModal();renderAll();toast('Consumo registrado');}; }
 
@@ -479,11 +503,25 @@
   function openTask(id){ const x=state.tasks.find(i=>i.id===id)||{title:'',type:'Tarea',assigned:'Ambos',due:'',priority:'Media',done:false}; modal(id?'Editar tarea':'Nueva tarea',formWrap(`<div class="grid sm:grid-cols-2 gap-4"><div class="sm:col-span-2">${input('Título','title',x.title,'text','required')}</div>${select('Tipo','type',['Tarea','Compra general'],x.type)}${select('Responsable','assigned',[state.settings.partnerA,state.settings.partnerB,'Ambos'],x.assigned)}${input('Vencimiento','due',x.due,'date')}${select('Prioridad','priority',['Alta','Media','Baja'],x.priority)}</div>`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,id:id||uid()};id?Object.assign(x,obj):state.tasks.push(obj);save();closeModal();renderAll();}; }
   function openProduct(id){ const x=state.products.find(i=>i.id===id)||{name:'',category:'Otros',unit:'unidades',market:0,supermarket:0,wholesale:0,pantryUnit:'unidades',conversion:1}; modal(id?'Editar producto master':'Nuevo producto master',formWrap(`<div class="grid sm:grid-cols-2 gap-4">${input('Nombre','name',x.name,'text','required')}${select('Categoría','category',CATEGORY_OPTIONS,x.category)}${select('Unidad de compra','unit',UNITS,x.unit)}${input('Precio mercado','market',x.market,'number','step="0.01"')}${input('Precio supermercado','supermarket',x.supermarket,'number','step="0.01"')}${input('Precio mayorista','wholesale',x.wholesale,'number','step="0.01"')}${select('Unidad de despensa','pantryUnit',UNITS,x.pantryUnit)}${input('Conversión','conversion',x.conversion,'number','step="0.01"')}</div>`)); document.getElementById('modalForm').onsubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const obj={...x,...f,market:Number(f.market),supermarket:Number(f.supermarket),wholesale:Number(f.wholesale),conversion:Number(f.conversion),id:id||uid()};id?Object.assign(x,obj):state.products.push(obj);save();closeModal();renderAll();}; }
 
+  function rollbackPantryEffect(cart){
+    const effect=cart.pantryEffect;
+    if(!effect)return;
+    const item=state.pantry.find(entry=>entry.id===effect.pantryItemId);
+    if(item){
+      const amount=ingredientConvert(cart.productName,Number(effect.qty),effect.unit,item.unit);
+      if(amount!==null)item.qty=Math.max(0,numberValue(item.qty)-amount);
+      if(effect.created&&item.qty<=0.0001)state.pantry=state.pantry.filter(entry=>entry.id!==item.id);
+    }
+    delete cart.pantryEffect;
+  }
+
   function toggleCart(id){
     const x=state.cart.find(i=>i.id===id); if(!x)return;
     if(!x.done){
       const paid=prompt('Total real pagado',String((x.qty*x.price).toFixed(2))); if(paid===null)return;
-      x.actualTotal=Number(paid)||x.qty*x.price; x.done=true;
+      const paidAmount=numberValue(paid,NaN);
+      if(!Number.isFinite(paidAmount)||paidAmount<0)return toast('Ingresa un total pagado válido');
+      x.actualTotal=paidAmount; x.done=true;
       x.date=todayISO();
       reconcileFinancialState(state);
       const p=productFor(x.productName), pr=profileFor(x.productName);
@@ -493,12 +531,17 @@
       if(pantryQty===null){pantryQty=Number(x.qty);pantryUnit=x.unit;}
       const purchaseToPantry=ingredientConvert(x.productName,1,purchaseUnit,pantryUnit);
       const existing=state.pantry.find(item=>normalizeText(item.productName)===normalizeText(x.productName));
-      if(existing){
-        let add=ingredientConvert(x.productName,pantryQty,pantryUnit,existing.unit);
-        if(add===null){existing.unit=pantryUnit;add=pantryQty;}
-        existing.qty=Number(existing.qty||0)+Number(add);
-      } else state.pantry.push({id:uid(),productName:x.productName,category:x.category,qty:Number(pantryQty),unit:pantryUnit,min:Math.max(1,Number(pantryQty)*.25),dailyUse:0,expiry:'',conversion:Number(purchaseToPantry||p?.conversion||pr?.conversion||1),purchaseUnit});
+      const add=existing?ingredientConvert(x.productName,pantryQty,pantryUnit,existing.unit):null;
+      if(existing&&add!==null){
+        existing.qty=numberValue(existing.qty)+Number(add);
+        x.pantryEffect={pantryItemId:existing.id,qty:Number(add),unit:existing.unit,created:false};
+      } else {
+        const item={id:uid(),productName:x.productName,category:x.category,qty:Number(pantryQty),unit:pantryUnit,min:Math.max(1,Number(pantryQty)*.25),dailyUse:0,expiry:'',conversion:Number(purchaseToPantry||p?.conversion||pr?.conversion||1),purchaseUnit};
+        state.pantry.push(item);
+        x.pantryEffect={pantryItemId:item.id,qty:Number(pantryQty),unit:pantryUnit,created:true};
+      }
     } else {
+      rollbackPantryEffect(x);
       x.done=false; state.expenses=state.expenses.filter(e=>e.sourceCartId!==x.id);
       reconcileFinancialState(state);
     }
